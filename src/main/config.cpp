@@ -31,6 +31,20 @@ namespace far_screamer
         fMid                = 0.0f;
         fSide               = 0.0f;
         fPreDelay           = 0;
+
+        sLPF.nType          = dspu::FLT_NONE;
+        sLPF.fFreq          = 0;
+        sLPF.fFreq2         = 0;
+        sLPF.fGain          = 1.0f;
+        sLPF.nSlope         = 1;
+        sLPF.fQuality       = 0.0f;
+
+        sHPF.nType          = dspu::FLT_NONE;
+        sHPF.fFreq          = 0;
+        sHPF.fFreq2         = 0;
+        sHPF.fGain          = 1.0f;
+        sHPF.nSlope         = 1;
+        sHPF.fQuality       = 0.0f;
     }
 
     config_t::~config_t()
@@ -46,6 +60,21 @@ namespace far_screamer
         fMid                = 0.0f;
         fSide               = 0.0f;
         fPreDelay           = 0;
+
+        sLPF.nType          = dspu::FLT_NONE;
+        sLPF.fFreq          = 0;
+        sLPF.fFreq2         = 0;
+        sLPF.fGain          = 1.0f;
+        sLPF.nSlope         = 1;
+        sLPF.fQuality       = 0.0f;
+
+        sHPF.nType          = dspu::FLT_NONE;
+        sHPF.fFreq          = 0;
+        sHPF.fFreq2         = 0;
+        sHPF.fGain          = 1.0f;
+        sHPF.nSlope         = 1;
+        sHPF.fQuality       = 0.0f;
+
         sInFile.clear();
         sOutFile.clear();
         sIRFile.clear();

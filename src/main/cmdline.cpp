@@ -43,8 +43,10 @@ namespace far_screamer
     static const option_t options[] =
     {
         { "-dg",  "--dry-gain",         false,     "Dry gain (in dB) - the amount of unprocessed signal"    },
+        { "-hp",  "--hi-pass",          false,     "High-pass filter parameters (--help for details)"       },
         { "-if",  "--in-file",          false,     "Input file"                                             },
         { "-ir",  "--ir-file",          false,     "Impulse response file"                                  },
+        { "-lp",  "--low-pass",         false,     "Low-pass filter parameters (--help for details)"        },
         { "-m",   "--mapping",          false,     "IR convolution mapping in format: out:in:ir[:gain]"     },
         { "-mb",  "--mid-balance",      false,     "The amount of Middle part (in dB) in stereo signal"     },
         { "-of",  "--out-file",         false,     "Output file"                                            },
@@ -216,6 +218,157 @@ namespace far_screamer
         return STATUS_OK;
     }
 
+    status_t parse_filter_params(dspu::filter_params_t *fp, const char *val, const char *parameter, bool lowpass)
+    {
+        if ((!strcmp(val, "--help")) || (!strcmp(val, "-h")))
+        {
+            printf("Filter parameters format: <type>:<slope>:<freq>[:<q>]\n");
+            printf("  type  - filter type, one of: RLC_BT, RLC_MT, BWC_BT, BWC_MT, LRX_BT, LRX_MT, APO_DR\n");
+            printf("  slope - filter slope (1 .. 4)\n");
+            printf("  freq  - filter cut-off frequency (10 .. 24000)\n");
+            printf("  q     - quality factor of filter (0 .. 100)\n");
+            printf("\n");
+
+            return STATUS_SKIP;
+        }
+
+        LSPString in;
+        if (!in.set_native(val))
+        {
+            fprintf(stderr, "Out of memory\n");
+            return STATUS_NO_MEM;
+        }
+
+        io::InStringSequence is(&in);
+        expr::Tokenizer t(&is);
+
+        // 'type'
+        switch (t.get_token(expr::TF_GET | expr::TF_XKEYWORDS | expr::TF_BAREWORD))
+        {
+            case expr::TT_BAREWORD:
+            {
+                const LSPString *ft = t.text_value();
+                if (ft->equals_ascii("RLC_BT"))
+                {
+                    fp->nSlope      = 2;
+                    fp->nType       = (lowpass) ? dspu::FLT_BT_RLC_LOPASS : dspu::FLT_BT_RLC_HIPASS;
+                }
+                else if (ft->equals_ascii("RLC_MT"))
+                {
+                    fp->nSlope      = 2;
+                    fp->nType       = (lowpass) ? dspu::FLT_MT_RLC_LOPASS : dspu::FLT_MT_RLC_HIPASS;
+                }
+                else if (ft->equals_ascii("BWC_BT"))
+                {
+                    fp->nSlope      = 2;
+                    fp->nType       = (lowpass) ? dspu::FLT_BT_BWC_LOPASS : dspu::FLT_BT_BWC_HIPASS;
+                }
+                else if (ft->equals_ascii("BWC_MT"))
+                {
+                    fp->nSlope      = 2;
+                    fp->nType       = (lowpass) ? dspu::FLT_MT_BWC_LOPASS : dspu::FLT_MT_BWC_HIPASS;
+                }
+                else if (ft->equals_ascii("LRX_BT"))
+                {
+                    fp->nSlope      = 1;
+                    fp->nType       = (lowpass) ? dspu::FLT_BT_LRX_LOPASS : dspu::FLT_BT_LRX_HIPASS;
+                }
+                else if (ft->equals_ascii("LRX_MT"))
+                {
+                    fp->nSlope      = 1;
+                    fp->nType       = (lowpass) ? dspu::FLT_MT_LRX_LOPASS : dspu::FLT_MT_LRX_HIPASS;
+                }
+                else if (ft->equals_ascii("APO_DR"))
+                {
+                    fp->nSlope      = 1;
+                    fp->nType       = (lowpass) ? dspu::FLT_DR_APO_LOPASS : dspu::FLT_DR_APO_HIPASS;
+                }
+                else
+                {
+                    fprintf(stderr, "Unknown filter type: %s\n", ft->get_native());
+                    return STATUS_BAD_FORMAT;
+                }
+
+                break;
+            }
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+
+        // 'slope'
+        if (t.get_token(expr::TF_GET) != expr::TT_COLON)
+        {
+            fprintf(stderr, "Bad '%s' value\n", parameter);
+            return STATUS_INVALID_VALUE;
+        }
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_IVALUE:
+            {
+                ssize_t slope = t.int_value();
+                if ((slope <= 0) || (slope > 4))
+                {
+                    fprintf(stderr, "Invalid slope value: %ld\n", long(slope));
+                    return STATUS_BAD_FORMAT;
+                }
+                fp->nSlope *= slope;
+                break;
+            }
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+
+        // 'freq'
+        if (t.get_token(expr::TF_GET) != expr::TT_COLON)
+        {
+            fprintf(stderr, "Bad '%s' value\n", parameter);
+            return STATUS_INVALID_VALUE;
+        }
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_IVALUE: fp->fFreq = t.int_value(); break;
+            case expr::TT_FVALUE: fp->fFreq = t.float_value(); break;
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+        if ((fp->fFreq < 10.0f) || (fp->fFreq > 24000.0f))
+        {
+            fprintf(stderr, "Invalid cut-off frequency %d for %s\n", int(fp->fFreq), parameter);
+            return STATUS_INVALID_VALUE;
+        }
+
+        // 'q'
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_EOF:
+                fp->fQuality    = 0.0f;
+                return STATUS_OK;
+            case expr::TT_COLON:
+                break;
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_IVALUE: fp->fQuality = t.int_value(); break;
+            case expr::TT_FVALUE: fp->fQuality = t.float_value(); break;
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+        if ((fp->fQuality < 0.0f) || (fp->fQuality > 100.0f))
+        {
+            fprintf(stderr, "Invalid quality factor %f for %s\n", fp->fQuality, parameter);
+            return STATUS_INVALID_VALUE;
+        }
+
+        return STATUS_OK;
+    }
+
     status_t parse_cmdline(config_t *cfg, int argc, const char **argv)
     {
         status_t res;
@@ -366,7 +519,16 @@ namespace far_screamer
             if ((res = parse_cmdline_float(&cfg->fPreDelay, val, "predelay")) != STATUS_OK)
                 return res;
         }
-
+        if ((val = options.get("--low-pass")) != NULL)
+        {
+            if ((res = parse_filter_params(&cfg->sLPF, val, "low-pass filter", true)) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--hi-pass")) != NULL)
+        {
+            if ((res = parse_filter_params(&cfg->sHPF, val, "high-pass filter", false)) != STATUS_OK)
+                return res;
+        }
 
         return STATUS_OK;
     }

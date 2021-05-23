@@ -24,6 +24,7 @@
 #include <lsp-plug.in/common/status.h>
 #include <lsp-plug.in/lltl/parray.h>
 #include <lsp-plug.in/io/Path.h>
+#include <lsp-plug.in/dsp-units/filters/common.h>
 
 #include <private/config.h>
 #include <private/cmdline.h>
@@ -45,6 +46,7 @@ UTEST_BEGIN("far_screamer", cmdline)
         UTEST_ASSERT(cfg->sOutFile.equals_ascii("out-file.wav"));
         UTEST_ASSERT(cfg->sIRFile.equals_ascii("ir-file.wav"));
 
+        // Check channel mapping
         UTEST_ASSERT(cfg->sMapping.size() == 3);
         ssize_t idx = 0;
         far_screamer::mapping_t *m;
@@ -66,6 +68,19 @@ UTEST_BEGIN("far_screamer", cmdline)
         UTEST_ASSERT(m->in == 9);
         UTEST_ASSERT(m->ir == 10);
         UTEST_ASSERT(float_equals_absolute(m->gain, 0.0f));
+
+        // Check filters
+        UTEST_ASSERT(cfg->sLPF.nType == dspu::FLT_BT_RLC_LOPASS);
+        UTEST_ASSERT(cfg->sLPF.nSlope == 4); // slope is twice greater than specified
+        UTEST_ASSERT(float_equals_absolute(cfg->sLPF.fFreq, 100.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sLPF.fFreq2, 0.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sLPF.fQuality, 0.0f));
+
+        UTEST_ASSERT(cfg->sHPF.nType == dspu::FLT_MT_LRX_HIPASS);
+        UTEST_ASSERT(cfg->sHPF.nSlope == 3);
+        UTEST_ASSERT(float_equals_absolute(cfg->sHPF.fFreq, 10000.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sHPF.fFreq2, 0.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sHPF.fQuality, 12.0f));
     }
 
     void parse_cmdline(far_screamer::config_t *cfg)
@@ -84,6 +99,8 @@ UTEST_BEGIN("far_screamer", cmdline)
             "-m",   "0:1:2:3",
             "-m",   "4:5:6:7.0",
             "-m",   "8:9:10",
+            "-lp",  "RLC_BT:2:100.0",
+            "-hp",  "LRX_MT:3:10000.0:12",
 
             NULL
         };

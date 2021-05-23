@@ -25,6 +25,7 @@
 #include <lsp-plug.in/common/types.h>
 #include <lsp-plug.in/runtime/LSPString.h>
 #include <lsp-plug.in/lltl/darray.h>
+#include <lsp-plug.in/dsp-units/filters/common.h>
 
 namespace far_screamer
 {
@@ -56,6 +57,8 @@ namespace far_screamer
             LSPString                               sInFile;        // Source file
             LSPString                               sOutFile;       // Destination file
             LSPString                               sIRFile;        // Impulse response file
+            dspu::filter_params_t                   sLPF;           // Low-pass filter
+            dspu::filter_params_t                   sHPF;           // Hi-pass filter
             lltl::darray<mapping_t>                 sMapping;       // Mapping of the IR convolution
 
         public:
