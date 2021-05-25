@@ -51,7 +51,7 @@ namespace far_screamer
         d->h = duration / 60;
     }
 
-    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name)
+    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *name)
     {
         status_t res;
         io::Path path;
@@ -61,14 +61,6 @@ namespace far_screamer
         {
             fprintf(stderr, "  could not read file '%s', error code: %d\n", name->get_native(), int(res));
             return res;
-        }
-        if (!path.is_absolute())
-        {
-            if ((res = path.set(base, name)) != STATUS_OK)
-            {
-                fprintf(stderr, "  could not read file '%s', error code: %d\n", name->get_native(), int(res));
-                return res;
-            }
         }
 
         // Load sample from file
@@ -98,7 +90,7 @@ namespace far_screamer
         return STATUS_OK;
     }
 
-    status_t save_audio_file(dspu::Sample *sample, const LSPString *base, const LSPString *fmt, expr::Resolver *vars)
+    status_t save_audio_file(dspu::Sample *sample, const LSPString *fmt, expr::Resolver *vars)
     {
         status_t res;
         expr::Expression x;
@@ -132,14 +124,6 @@ namespace far_screamer
         {
             fprintf(stderr, "  could not write file '%s', error code: %d\n", fname.get_native(), int(res));
             return res;
-        }
-        if (!path.is_absolute())
-        {
-            if ((res = path.set(base, &fname)) != STATUS_OK)
-            {
-                fprintf(stderr, "  could not write file '%s', error code: %d\n", fname.get_native(), int(res));
-                return res;
-            }
         }
 
         // Create parent directory recursively
@@ -188,12 +172,12 @@ namespace far_screamer
         // Check channel numbers
         if (src_ch >= src->channels())
         {
-            fprintf(stderr, "Invalid channel number for input file: %d", int(src_ch));
+            fprintf(stderr, "Invalid channel number for input file: %d\n", int(src_ch));
             return STATUS_BAD_ARGUMENTS;
         }
         if (ir_ch >= ir->channels())
         {
-            fprintf(stderr, "Invalid channel number for impulse response file: %d", int(ir_ch));
+            fprintf(stderr, "Invalid channel number for impulse response file: %d\n", int(ir_ch));
             return STATUS_BAD_ARGUMENTS;
         }
 
@@ -209,7 +193,7 @@ namespace far_screamer
             status_t res = dst->resize(num_ch, length, length);
             if (res != STATUS_OK)
             {
-                fprintf(stderr, "Not enough memory to resize the output audio data");
+                fprintf(stderr, "Not enough memory to resize the output audio data\n");
                 return res;
             }
         }
@@ -219,7 +203,7 @@ namespace far_screamer
         float *buf          = alloc_aligned<float>(ptr, length);
         if (buf == NULL)
         {
-            fprintf(stderr, "Not enough memory to allocate temporary buffer");
+            fprintf(stderr, "Not enough memory to allocate temporary buffer\n");
             return STATUS_NO_MEM;
         }
 
@@ -227,7 +211,7 @@ namespace far_screamer
         if (!cv.init(ir->channel(ir_ch), ir->length(), 16, 0))
         {
             free_aligned(ptr);
-            fprintf(stderr, "Not enough memory to initialize convolver");
+            fprintf(stderr, "Not enough memory to initialize convolver\n");
             return STATUS_NO_MEM;
         }
         dsp::fill_zero(buf, length); // Fill head of buffer with zeros
@@ -244,22 +228,22 @@ namespace far_screamer
         return STATUS_OK;
     }
 
-    status_t adjust_latency_gain(dspu::Sample *dst, size_t latency, float gain)
+    status_t adjust_latency_gain(dspu::Sample *dst, const dspu::Sample *src, size_t latency, float gain)
     {
-        size_t channels     = dst->channels();
-        size_t length       = dst->length();
+        size_t channels     = src->channels();
+        size_t length       = src->length();
         size_t new_length   = latency + length;
 
         if (channels <= 0)
             return STATUS_OK;
 
         // Resize sample to the new size with added amount of latency
-        if (length != new_length)
+        if ((dst->length() != new_length) || (dst->channels() != channels))
         {
             status_t res = dst->resize(channels, new_length, new_length);
             if (res != STATUS_OK)
             {
-                fprintf(stderr, "Could not resize audio sample to %d channels, %d samples",
+                fprintf(stderr, "Could not resize audio sample to %d channels, %d samples\n",
                         int(channels), int(new_length));
                 return res;
             }
@@ -268,11 +252,10 @@ namespace far_screamer
         // Apply latency and gain to the sample
         for (size_t i=0; i<channels; ++i)
         {
-            float *buf  = dst->channel(i);
-            if (gain != 1.0f) // Apply gain
-                dsp::mul_k2(&buf[0], gain, length);
-            dsp::move(&buf[latency], &buf[0], length);  // Apply latency
-            dsp::fill_zero(&buf[0], latency);           // Pad with zeros
+            const float *sbuf   = src->channel(i);
+            float *dbuf         = dst->channel(i);
+            dsp::mul_k2(&dbuf[latency], gain, length);
+            dsp::fill_zero(&dbuf[0], latency);          // Pad with zeros
         }
 
         return STATUS_OK;
@@ -293,7 +276,7 @@ namespace far_screamer
             status_t res = dst->resize(channels, new_length, new_length);
             if (res != STATUS_OK)
             {
-                fprintf(stderr, "Could not resize audio sample to %d channels, %d samples",
+                fprintf(stderr, "Could not resize audio sample to %d channels, %d samples\n",
                         int(channels), int(new_length));
                 return res;
             }
