@@ -243,6 +243,7 @@ namespace far_screamer
         // Load audio files
         if ((res = load_audio_file(&in, cfg.nSampleRate, &cfg.sInFile)) != STATUS_OK)
             return res;
+        cfg.nSampleRate = in.sample_rate();
         if ((res = load_audio_file(&ir, cfg.nSampleRate, &cfg.sIRFile)) != STATUS_OK)
             return res;
 
@@ -254,6 +255,9 @@ namespace far_screamer
         if ((res = convolve_data(&out, &in, &ir, &cfg, latency)) != STATUS_OK)
             return res;
 
+        // Export the processed audio file
+        if ((res = save_audio_file(&out, &cfg.sOutFile)) != STATUS_OK)
+            return res;
 
         return STATUS_OK;
     }

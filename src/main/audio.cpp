@@ -51,7 +51,7 @@ namespace far_screamer
         d->h = duration / 60;
     }
 
-    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *name)
+    status_t load_audio_file(dspu::Sample *sample, ssize_t srate, const LSPString *name)
     {
         status_t res;
         io::Path path;
@@ -79,50 +79,30 @@ namespace far_screamer
         );
 
         // Resample audio data
-        if ((res = sample->resample(srate)) != STATUS_OK)
+        if (srate > 0)
         {
-            fprintf(stderr, "  could not resample file '%s' to sample rate %d, error code: %d\n",
-                    path.as_native(), int(srate), int(res)
-            );
-            return res;
+            if ((res = sample->resample(srate)) != STATUS_OK)
+            {
+                fprintf(stderr, "  could not resample file '%s' to sample rate %d, error code: %d\n",
+                        path.as_native(), int(srate), int(res)
+                );
+                return res;
+            }
         }
 
         return STATUS_OK;
     }
 
-    status_t save_audio_file(dspu::Sample *sample, const LSPString *fmt, expr::Resolver *vars)
+    status_t save_audio_file(dspu::Sample *sample, const LSPString *fname)
     {
         status_t res;
         expr::Expression x;
-        expr::value_t val;
-        LSPString fname;
         io::Path path, dir;
 
-        // Parse the expression
-        if ((res = x.parse(fmt, expr::Expression::FLAG_STRING)) != STATUS_OK)
-        {
-            fprintf(stderr, "  invalid expression: '%s'\n", fmt->get_native());
-            return STATUS_BAD_FORMAT;
-        }
-
-        // Evaluate the expression and cast to string
-        expr::init_value(&val);
-        x.set_resolver(vars);
-        if ((res = x.evaluate(&val)) == STATUS_OK)
-            res = expr::cast_string(&val);
-        if (res != STATUS_OK)
-        {
-            expr::destroy_value(&val);
-            fprintf(stderr, "  could not evaluate expression: '%s'\n", fmt->get_native());
-            return STATUS_BAD_FORMAT;
-        }
-        fname.swap(val.v_str);
-        expr::destroy_value(&val);
-
         // Generate file name
-        if ((res = path.set(&fname)) != STATUS_OK)
+        if ((res = path.set(fname)) != STATUS_OK)
         {
-            fprintf(stderr, "  could not write file '%s', error code: %d\n", fname.get_native(), int(res));
+            fprintf(stderr, "  could not write file '%s', error code: %d\n", fname->get_native(), int(res));
             return res;
         }
 
@@ -138,7 +118,7 @@ namespace far_screamer
         }
         else if (res != STATUS_NOT_FOUND)
         {
-            fprintf(stderr, "  could not obtain parent directory for file '%s', error code: %d\n", fname.get_native(), int(res));
+            fprintf(stderr, "  could not obtain parent directory for file '%s', error code: %d\n", fname->get_native(), int(res));
             return res;
         }
 
@@ -254,7 +234,7 @@ namespace far_screamer
         {
             const float *sbuf   = src->channel(i);
             float *dbuf         = dst->channel(i);
-            dsp::mul_k2(&dbuf[latency], gain, length);
+            dsp::mul_k3(&dbuf[latency], sbuf, gain, length);
             dsp::fill_zero(&dbuf[0], latency);          // Pad with zeros
         }
 

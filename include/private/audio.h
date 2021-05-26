@@ -40,17 +40,16 @@ namespace far_screamer
      * @param name name of the file
      * @return status of operation
      */
-    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *name);
+    status_t load_audio_file(dspu::Sample *sample, ssize_t srate, const LSPString *name);
 
     /**
      * Save audio file
      *
      * @param sample sample to save
-     * @param fmt output file name format
-     * @param vars variable to parametrize the output file name format
+     * @param fname output file name
      * @return status of operation
      */
-    status_t save_audio_file(dspu::Sample *sample, const LSPString *fmt, expr::Resolver *vars);
+    status_t save_audio_file(dspu::Sample *sample, const LSPString *fname);
 
     /**
      * Convolve the specified channel of input audio file with specified channel of the impulse response
