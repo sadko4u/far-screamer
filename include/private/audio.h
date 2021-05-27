@@ -90,6 +90,14 @@ namespace far_screamer
      */
     status_t filter_sample(dspu::Sample *dst, dspu::Equalizer *eq);
 
+    /**
+     * Apply Mid/Side balance
+     * @param dst destination sample to apply balance
+     * @param mid middle control
+     * @param side Side control
+     */
+    void apply_mid_side(dspu::Sample *dst, float mid, float side);
+
 }
 
 

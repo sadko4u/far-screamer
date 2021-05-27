@@ -255,6 +255,11 @@ namespace far_screamer
         if ((res = convolve_data(&out, &in, &ir, &cfg, latency)) != STATUS_OK)
             return res;
 
+        // Apply mid/side balance
+        float mid_g  = (cfg.fMid  >= MIN_GAIN) ? dspu::db_to_gain(cfg.fMid)  : 0.0f;
+        float side_g = (cfg.fSide >= MIN_GAIN) ? dspu::db_to_gain(cfg.fSide) : 0.0f;
+        apply_mid_side(&out, mid_g, side_g);
+
         // Export the processed audio file
         out.set_sample_rate(in.sample_rate());
         if ((res = save_audio_file(&out, &cfg.sOutFile)) != STATUS_OK)

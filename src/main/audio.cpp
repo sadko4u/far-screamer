@@ -272,6 +272,31 @@ namespace far_screamer
 
         return STATUS_OK;
     }
+
+    void apply_mid_side(dspu::Sample *dst, float mid, float side)
+    {
+        if (dst->channels() == 1)
+        {
+            printf("  mono output has no side part, adjusting only mono part\n");
+            dsp::mul_k2(dst->channel(0), mid, dst->length());
+        }
+        else if (dst->channels() == 2)
+        {
+            printf("  adjusting Mid/Side balance for stereo output signal\n");
+
+            float *a = dst->channel(0);
+            float *b = dst->channel(1);
+            size_t length = dst->length();
+            dsp::lr_to_ms(a, b, a, b, length);
+            dsp::mul_k2(a, mid, length);
+            dsp::mul_k2(b, side, length);
+            dsp::ms_to_lr(a, b, a, b, length);
+        }
+        else
+        {
+            printf("  unsupported mid/side balancing for %d output channels", int(dst->channels()));
+        }
+    }
 }
 
 
