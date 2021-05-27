@@ -82,10 +82,9 @@ namespace far_screamer
     status_t convolve_data(dspu::Sample *out, const dspu::Sample *in, const dspu::Sample *ir, config_t *cfg, size_t latency)
     {
         // Flags that indicate that dry signal has been emitted to the specified output track
-        status_t res;
         size_t predelay = dspu::millis_to_samples(cfg->nSampleRate, cfg->fPreDelay);
         size_t out_length = in->length() + ir->length() + latency + predelay;
-        float g_dry = (cfg->fDry >= MIN_GAIN) ? dspu::gain_to_db(cfg->fDry) : 0.0f;
+        float g_dry = (cfg->fDry >= MIN_GAIN) ? dspu::db_to_gain(cfg->fDry) : 0.0f;
 
         if (cfg->sMapping.is_empty())
         {
@@ -114,7 +113,7 @@ namespace far_screamer
             else if ((in->channels() == 2) && (ir->channels() == 4))
             {
                 // True reverb convolution
-                printf("Applying TrueReverb convolution\n");
+                printf("  applying TrueReverb convolution schema\n");
                 if (!(xm = cfg->sMapping.add_n(4)))
                 {
                     fprintf(stderr, "Not enough memory for generating mapping data\n");
@@ -133,16 +132,16 @@ namespace far_screamer
             }
             else if (in->channels() == 1)
             {
-                printf("Applying IR to mono file\n");
+                printf("  applying IR to mono file\n");
 
-                if (!(xm = cfg->sMapping.add_n(out->channels())))
+                if (!(xm = cfg->sMapping.add_n(ir->channels())))
                 {
                     fprintf(stderr, "Not enough memory for generating mapping data\n");
                     return STATUS_NO_MEM;
                 }
 
                 // Simple 1:n mapping
-                for (size_t i=0; i<out->channels(); ++i)
+                for (size_t i=0; i<ir->channels(); ++i)
                 {
                     xm[i].in    = 0;
                     xm[i].out   = i;
@@ -152,7 +151,7 @@ namespace far_screamer
             }
             else if (ir->channels() == 1)
             {
-                printf("Applying mono IR to file\n");
+                printf("  applying mono IR to file\n");
 
                 if (!(xm = cfg->sMapping.add_n(in->channels())))
                 {
@@ -176,7 +175,7 @@ namespace far_screamer
             }
         }
         else
-            printf("Applying mapping-defined convolution\n");
+            printf("  applying mapping-defined convolution\n");
 
         // Estimate number of output channels
         size_t out_channels = 0;
@@ -188,10 +187,10 @@ namespace far_screamer
         }
 
         // Resize the output sample
-        if ((res = out->resize(out_channels, out_length, out_length)) != STATUS_OK)
+        if (!out->resize(out_channels, out_length, out_length))
         {
             fprintf(stderr, "Not enough memory for output data\n");
-            return STATUS_BAD_ARGUMENTS;
+            return STATUS_NO_MEM;
         }
 
         // Form the 'Dry' sound according to the mapping settings
@@ -216,14 +215,14 @@ namespace far_screamer
             const mapping_t *m = cfg->sMapping.uget(i);
 
             // Output information
-            printf("Convolving IN channel %d with IR channel %d to OUT channel %d at %.2f dB\n",
-                int(m->in), int(m->ir), int(m->out), m->gain
+            printf("  convolving IN channel %d with IR channel %d to OUT channel %d at %.2f dB\n",
+                int(m->in), int(m->ir), int(m->out), dspu::gain_to_db(m->gain)
             );
 
             // Perform convolution
             float gain = m->gain + cfg->fWet;
             if (gain >= MIN_GAIN)
-                convolve(out, in, ir, m->out, m->in, m->ir, predelay, dspu::gain_to_db(gain));
+                convolve(out, in, ir, m->out, m->in, m->ir, predelay, dspu::db_to_gain(gain));
         }
 
         return STATUS_OK;
@@ -248,6 +247,7 @@ namespace far_screamer
             return res;
 
         // Apply filters to the IR
+        printf("  applying IR filters\n");
         if ((res = apply_equalizer(&latency, &ir, &cfg)) != STATUS_OK)
             return res;
 
@@ -256,6 +256,7 @@ namespace far_screamer
             return res;
 
         // Export the processed audio file
+        out.set_sample_rate(in.sample_rate());
         if ((res = save_audio_file(&out, &cfg.sOutFile)) != STATUS_OK)
             return res;
 
