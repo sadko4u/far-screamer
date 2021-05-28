@@ -219,7 +219,7 @@ namespace far_screamer
 
             // Output information
             printf("  convolving IN channel %d with IR channel %d to OUT channel %d at %.2f dB\n",
-                int(m->in), int(m->ir), int(m->out), dspu::gain_to_db(m->gain)
+                int(m->in), int(m->ir), int(m->out), m->gain
             );
 
             // Perform convolution
