@@ -294,8 +294,34 @@ namespace far_screamer
         }
         else
         {
-            printf("  unsupported mid/side balancing for %d output channels", int(dst->channels()));
+            printf("  unsupported mid/side balancing for %d output channels, skipping", int(dst->channels()));
         }
+    }
+
+    status_t cut_sample(dspu::Sample *dst, size_t head_cut, size_t tail_cut, size_t fade_in, size_t fade_out)
+    {
+        ssize_t new_length = dst->length() - (head_cut + tail_cut);
+        if (new_length <= 0)
+        {
+            printf("  empty output sample after cutting head and tail, can not proceed\n");
+            return STATUS_UNDERFLOW;
+        }
+
+        // Cut the body
+        size_t channels = dst->channels();
+        for (size_t i=0; i<channels; ++i)
+        {
+            float *channel  = dst->channel(i);
+            // Apply cut
+            dsp::move(channel, &channel[head_cut], new_length);
+            // Apply fades
+            dspu::fade_in(channel, channel, fade_in, new_length);
+            dspu::fade_out(channel, channel, fade_out, new_length);
+        }
+
+        // Resize the sample and exit
+        dst->set_length(new_length);
+        return STATUS_OK;
     }
 }
 

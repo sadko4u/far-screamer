@@ -45,6 +45,10 @@ UTEST_BEGIN("far_screamer", cmdline)
         UTEST_ASSERT(cfg->sInFile.equals_ascii("in-file.wav"));
         UTEST_ASSERT(cfg->sOutFile.equals_ascii("out-file.wav"));
         UTEST_ASSERT(cfg->sIRFile.equals_ascii("ir-file.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->fFadeIn, 10.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fFadeOut, 20.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fHeadCut, 30.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fTailCut, 40.0f));
 
         // Check channel mapping
         UTEST_ASSERT(cfg->sMapping.size() == 3);
@@ -96,6 +100,10 @@ UTEST_BEGIN("far_screamer", cmdline)
             "-if",  "in-file.wav",
             "-of",  "out-file.wav",
             "-ir",  "ir-file.wav",
+            "-fi",  "10",
+            "-fo",  "20",
+            "-hc",  "30",
+            "-tc",  "40",
             "-m",   "0:1:2:3",
             "-m",   "4:5:6:7.0",
             "-m",   "8:9:10",

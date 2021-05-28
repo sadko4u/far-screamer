@@ -43,6 +43,9 @@ namespace far_screamer
     static const option_t options[] =
     {
         { "-dg",  "--dry-gain",         false,     "Dry gain (in dB) - the amount of unprocessed signal"    },
+        { "-fi",  "--fade-in",          false,     "Fade in of the IR file (in milliseconds)"               },
+        { "-fo",  "--fade-out",         false,     "Fade out of the IR file (in milliseconds)"              },
+        { "-hc",  "--head-cut",         false,     "Head cut of the IR file (in milliseconds)"              },
         { "-hp",  "--hi-pass",          false,     "High-pass filter parameters (--help for details)"       },
         { "-if",  "--in-file",          false,     "Input file"                                             },
         { "-ir",  "--ir-file",          false,     "Impulse response file"                                  },
@@ -53,6 +56,7 @@ namespace far_screamer
         { "-pd",  "--predelay",         false,     "The amount of pre-delay added to the signal (in ms)"    },
         { "-sb",  "--side-balance",     false,     "The amount of Side part (in dB) in stereo signal"       },
         { "-sr",  "--srate",            false,     "Sample rate of output file"                             },
+        { "-tc",  "--tail-cut",         false,     "Tail cut of the IR file (in milliseconds)"              },
         { "-wg",  "--wet-gain",         false,     "Wet gain (in dB) - the amount of processed signal"      },
 
         { NULL, NULL, false, NULL }
@@ -527,6 +531,26 @@ namespace far_screamer
         if ((val = options.get("--hi-pass")) != NULL)
         {
             if ((res = parse_filter_params(&cfg->sHPF, val, "high-pass filter", false)) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--head-cut")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fHeadCut, val, "head cut")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--tail-cut")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fTailCut, val, "tail cut")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--fade-in")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fFadeIn, val, "fade in")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--fade-out")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fFadeOut, val, "fade out")) != STATUS_OK)
                 return res;
         }
 

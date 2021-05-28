@@ -98,6 +98,17 @@ namespace far_screamer
      */
     void apply_mid_side(dspu::Sample *dst, float mid, float side);
 
+    /**
+     * Perform sample cut
+     * @param dst destination sample to perform cut
+     * @param head_cut amount of samples to cut from beginning
+     * @param tail_cut amount of samples to cuta from end
+     * @param fade_in amount of samples to perform fade-in
+     * @param fade_out amount of samples to perform fade-out
+     * @return status of operation
+     */
+    status_t cut_sample(dspu::Sample *dst, size_t head_cut, size_t tail_cut, size_t fade_in, size_t fade_out);
+
 }
 
 

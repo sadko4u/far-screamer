@@ -31,6 +31,10 @@ namespace far_screamer
         fMid                = 0.0f;
         fSide               = 0.0f;
         fPreDelay           = 0;
+        fFadeIn             = 0.0f;
+        fFadeOut            = 0.0f;
+        fHeadCut            = 0.0f;
+        fTailCut            = 0.0f;
 
         sLPF.nType          = dspu::FLT_NONE;
         sLPF.fFreq          = 0;
@@ -60,6 +64,10 @@ namespace far_screamer
         fMid                = 0.0f;
         fSide               = 0.0f;
         fPreDelay           = 0;
+        fFadeIn             = 0.0f;
+        fFadeOut            = 0.0f;
+        fHeadCut            = 0.0f;
+        fTailCut            = 0.0f;
 
         sLPF.nType          = dspu::FLT_NONE;
         sLPF.fFreq          = 0;

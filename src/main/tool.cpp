@@ -228,6 +228,39 @@ namespace far_screamer
         return STATUS_OK;
     }
 
+    status_t apply_fades(dspu::Sample *s, const config_t *cfg)
+    {
+        ssize_t head_cut = dspu::millis_to_samples(s->sample_rate(), cfg->fHeadCut);
+        if (head_cut < 0)
+        {
+            fprintf(stderr, "Negative head cut value, can not proceed\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        ssize_t tail_cut = dspu::millis_to_samples(s->sample_rate(), cfg->fTailCut);
+        if (tail_cut < 0)
+        {
+            fprintf(stderr, "Negative tail cut value, can not proceed\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        ssize_t fade_in = dspu::millis_to_samples(s->sample_rate(), cfg->fFadeIn);
+        if (fade_in < 0)
+        {
+            fprintf(stderr, "Negative fade in value, can not proceed\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        ssize_t fade_out = dspu::millis_to_samples(s->sample_rate(), cfg->fFadeOut);
+        if (fade_in < 0)
+        {
+            fprintf(stderr, "Negative fade out value, can not proceed\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        return cut_sample(s, head_cut, tail_cut, fade_in, fade_out);
+    }
+
     int main(int argc, const char **argv)
     {
         config_t cfg;
@@ -239,12 +272,23 @@ namespace far_screamer
         if ((res = parse_cmdline(&cfg, argc, argv)) != STATUS_OK)
             return (res == STATUS_SKIP) ? STATUS_OK : res;
 
-        // Load audio files
+        // Load audio file
         if ((res = load_audio_file(&in, cfg.nSampleRate, &cfg.sInFile)) != STATUS_OK)
             return res;
         cfg.nSampleRate = in.sample_rate();
+
+        // Load IR file
         if ((res = load_audio_file(&ir, cfg.nSampleRate, &cfg.sIRFile)) != STATUS_OK)
             return res;
+
+        // Apply fades to the IR file
+        LSPString path;
+        path.set_ascii("tmp/ir-no-fades.wav");
+        save_audio_file(&ir, &path);
+        if ((res = apply_fades(&ir, &cfg)) != STATUS_OK)
+            return res;
+        path.set_ascii("tmp/ir-with-fades.wav");
+        save_audio_file(&ir, &path);
 
         // Apply filters to the IR
         printf("  applying IR filters\n");

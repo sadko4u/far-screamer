@@ -54,6 +54,10 @@ namespace far_screamer
             float                                   fMid;           // Amount of the middle signal
             float                                   fSide;          // Amount of the size signal
             float                                   fPreDelay;      // Pre-delay of the signal
+            float                                   fFadeIn;        // Fade-in length
+            float                                   fFadeOut;       // Fade-out length
+            float                                   fHeadCut;       // Head cut
+            float                                   fTailCut;       // Tail cut
             LSPString                               sInFile;        // Source file
             LSPString                               sOutFile;       // Destination file
             LSPString                               sIRFile;        // Impulse response file
