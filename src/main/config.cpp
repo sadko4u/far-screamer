@@ -26,7 +26,7 @@ namespace far_screamer
     config_t::config_t()
     {
         nSampleRate         = -1;
-        fDry                = 0.0f;
+        fDry                = -1000.0f;
         fWet                = 0.0f;
         fMid                = 0.0f;
         fSide               = 0.0f;
@@ -59,7 +59,7 @@ namespace far_screamer
     void config_t::clear()
     {
         nSampleRate         = -1;
-        fDry                = 0.0f;
+        fDry                = -1000.0f;
         fWet                = 0.0f;
         fMid                = 0.0f;
         fSide               = 0.0f;

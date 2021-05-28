@@ -59,7 +59,10 @@ namespace far_screamer
         if (cfg->sHPF.nType != dspu::FLT_NONE)
             eq.set_params(index++, &cfg->sHPF);
         if (index <= 0)
+        {
+            *latency    = 0;
             return STATUS_OK;
+        }
 
         // Perform audio processing of the IR file
         filter_sample(dst, &eq);
@@ -265,7 +268,7 @@ namespace far_screamer
     {
         config_t cfg;
         status_t res;
-        size_t latency;
+        size_t latency = 0;
         dspu::Sample in, out, ir;
 
         // Parse configuration

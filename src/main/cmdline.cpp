@@ -474,29 +474,6 @@ namespace far_screamer
             if ((res = parse_cmdline_int(&cfg->nSampleRate, val, "sample rate")) != STATUS_OK)
                 return res;
         }
-        if ((val = options.get("--in-file")) != NULL)
-            cfg->sInFile.set_native(val);
-        else
-        {
-            fprintf(stderr, "Input file name required\n");
-            return STATUS_BAD_ARGUMENTS;
-        }
-
-        if ((val = options.get("--out-file")) != NULL)
-            cfg->sOutFile.set_native(val);
-        else
-        {
-            fprintf(stderr, "Output file name required\n");
-            return STATUS_BAD_ARGUMENTS;
-        }
-
-        if ((val = options.get("--ir-file")) != NULL)
-            cfg->sIRFile.set_native(val);
-        else
-        {
-            fprintf(stderr, "Impulse response file name required\n");
-            return STATUS_BAD_ARGUMENTS;
-        }
 
         if ((val = options.get("--dry-gain")) != NULL)
         {
@@ -552,6 +529,31 @@ namespace far_screamer
         {
             if ((res = parse_cmdline_float(&cfg->fFadeOut, val, "fade out")) != STATUS_OK)
                 return res;
+        }
+
+        // Mandatory parameters
+        if ((val = options.get("--in-file")) != NULL)
+            cfg->sInFile.set_native(val);
+        else
+        {
+            fprintf(stderr, "Input file name required\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        if ((val = options.get("--out-file")) != NULL)
+            cfg->sOutFile.set_native(val);
+        else
+        {
+            fprintf(stderr, "Output file name required\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        if ((val = options.get("--ir-file")) != NULL)
+            cfg->sIRFile.set_native(val);
+        else
+        {
+            fprintf(stderr, "Impulse response file name required\n");
+            return STATUS_BAD_ARGUMENTS;
         }
 
         return STATUS_OK;
