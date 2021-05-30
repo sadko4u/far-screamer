@@ -35,6 +35,9 @@ namespace far_screamer
         fFadeOut            = 0.0f;
         fHeadCut            = 0.0f;
         fTailCut            = 0.0f;
+        nNormalize          = NORM_NONE;    // No normalization by default
+        fNormGain           = 0.0f;         // 0 dB gain by default
+        bTrim               = false;
 
         sLPF.nType          = dspu::FLT_NONE;
         sLPF.fFreq          = 0;
@@ -68,6 +71,9 @@ namespace far_screamer
         fFadeOut            = 0.0f;
         fHeadCut            = 0.0f;
         fTailCut            = 0.0f;
+        nNormalize          = NORM_NONE;
+        fNormGain           = 0.0f;
+        bTrim               = false;
 
         sLPF.nType          = dspu::FLT_NONE;
         sLPF.fFreq          = 0;

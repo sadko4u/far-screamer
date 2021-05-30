@@ -39,6 +39,14 @@ namespace far_screamer
         float       gain;       // The applied gain
     } mapping_t;
 
+    enum normalize_t
+    {
+        NORM_NONE,              // No normalization
+        NORM_ABOVE,             // When the maximum peak is above the threshold
+        NORM_BELOW,             // When the maximum peak is below the threshold
+        NORM_ALWAYS             // Always normalize
+    };
+
     /**
      * Overall configuration
      */
@@ -58,6 +66,9 @@ namespace far_screamer
             float                                   fFadeOut;       // Fade-out length
             float                                   fHeadCut;       // Head cut
             float                                   fTailCut;       // Tail cut
+            ssize_t                                 nNormalize;     // Normalization method
+            float                                   fNormGain;      // Normalization gain
+            bool                                    bTrim;          // Trim to original file
             LSPString                               sInFile;        // Source file
             LSPString                               sOutFile;       // Destination file
             LSPString                               sIRFile;        // Impulse response file
