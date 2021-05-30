@@ -109,6 +109,14 @@ namespace far_screamer
      */
     status_t cut_sample(dspu::Sample *dst, size_t head_cut, size_t tail_cut, size_t fade_in, size_t fade_out);
 
+    /**
+     * Normalize sample to the specified gain
+     * @param dst sample to normalize
+     * @param gain the maximum peak gain
+     * @param mode the normalization mode
+     * @return status of operation
+     */
+    status_t normalize(dspu::Sample *dst, float gain, size_t mode);
 }
 
 

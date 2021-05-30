@@ -28,12 +28,16 @@ The full list can be obtained by issuing ```far-screamer --help``` command and i
   -lp, --low-pass        Low-pass filter parameters (--help for details)
   -m, --mapping          IR convolution mapping in format: out:in:ir[:gain]
   -mb, --mid-balance     The amount of Middle part (in dB) in stereo signal
+  -n, --normalize        Set normalization mode
+  -ng, --norm-gain       Set normalization peak gain (in dB)
   -of, --out-file        Output file
   -pd, --predelay        The amount of pre-delay added to the signal (in ms)
   -sb, --side-balance    The amount of Side part (in dB) in stereo signal
   -sr, --srate           Sample rate of output file
   -tc, --tail-cut        Tail cut of the IR file (in milliseconds)
+  -tl, --trim-length     Trim length of output file to match the input file
   -wg, --wet-gain        Wet gain (in dB) - the amount of processed signal
+
 
 ```
 

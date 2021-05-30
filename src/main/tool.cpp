@@ -302,10 +302,18 @@ namespace far_screamer
         if ((res = convolve_data(&out, &in, &ir, &cfg, latency)) != STATUS_OK)
             return res;
 
+        // Trim file if option is specified
+        if (cfg.bTrim)
+            out.set_length(in.length());
+
         // Apply mid/side balance
         float mid_g  = (cfg.fMid  >= MIN_GAIN) ? dspu::db_to_gain(cfg.fMid)  : 0.0f;
         float side_g = (cfg.fSide >= MIN_GAIN) ? dspu::db_to_gain(cfg.fSide) : 0.0f;
         apply_mid_side(&out, mid_g, side_g);
+
+        // Normalize file
+        float norm_gain = (cfg.fNormGain >= MIN_GAIN) ? dspu::db_to_gain(cfg.fNormGain) : 0.0f;
+        normalize(&out, norm_gain, cfg.nNormalize);
 
         // Export the processed audio file
         out.set_sample_rate(in.sample_rate());

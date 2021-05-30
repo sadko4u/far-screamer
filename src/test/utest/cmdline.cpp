@@ -49,6 +49,9 @@ UTEST_BEGIN("far_screamer", cmdline)
         UTEST_ASSERT(float_equals_absolute(cfg->fFadeOut, 20.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->fHeadCut, 30.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->fTailCut, 40.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, -3.0f));
+        UTEST_ASSERT(cfg->nNormalize == far_screamer::NORM_ALWAYS);
+        UTEST_ASSERT(cfg->bTrim == true);
 
         // Check channel mapping
         UTEST_ASSERT(cfg->sMapping.size() == 3);
@@ -109,6 +112,9 @@ UTEST_BEGIN("far_screamer", cmdline)
             "-m",   "8:9:10",
             "-lp",  "RLC_BT:2:100.0",
             "-hp",  "LRX_MT:3:10000.0:12",
+            "-tl",  "true",
+            "-ng",  "-3.0",
+            "-n",   "ALWAYS",
 
             NULL
         };
