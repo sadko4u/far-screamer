@@ -65,7 +65,7 @@ namespace far_screamer
         { "-sb",  "--side-balance",     false,     "The amount of Side part (in dB) in stereo signal"       },
         { "-sr",  "--srate",            false,     "Sample rate of output file"                             },
         { "-tc",  "--tail-cut",         false,     "Tail cut of the IR file (in milliseconds)"              },
-        { "-tl",  "--trim-length",      false,     "Trim length of output file to match the input file"     },
+        { "-tl",  "--trim-length",      true,      "Trim length of output file to match the input file"     },
         { "-wg",  "--wet-gain",         false,     "Wet gain (in dB) - the amount of processed signal"      },
 
         { NULL, NULL, false, NULL }
@@ -537,7 +537,7 @@ namespace far_screamer
                 for (const option_t *p = far_screamer::options; p->s_short != NULL; ++p)
                     if (!strcmp(xopt, p->s_long))
                     {
-                        if (i >= argc)
+                        if ((!p->s_flag) && (i >= argc))
                         {
                             fprintf(stderr, "Not defined value for option: %s\n", opt);
                             return STATUS_BAD_ARGUMENTS;
@@ -633,10 +633,7 @@ namespace far_screamer
                 return res;
         }
         if (options.contains("--trim-length"))
-        {
-            if ((res = parse_cmdline_bool(&cfg->bTrim, val, "trim length")) != STATUS_OK)
-                return res;
-        }
+            cfg->bTrim  = true;
         if ((val = options.get("--norm-gain")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fNormGain, val, "norm-gain")) != STATUS_OK)

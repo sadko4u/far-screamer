@@ -4,6 +4,8 @@
 
 === 0.5.2 ===
 
+* Fixed command-line parsing.
+
 === 0.5.1 ===
 
 * Added gain normalization feature.

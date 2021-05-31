@@ -112,7 +112,7 @@ UTEST_BEGIN("far_screamer", cmdline)
             "-m",   "8:9:10",
             "-lp",  "RLC_BT:2:100.0",
             "-hp",  "LRX_MT:3:10000.0:12",
-            "-tl",  "true",
+            "-tl",
             "-ng",  "-3.0",
             "-n",   "ALWAYS",
 
