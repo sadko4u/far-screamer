@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.3 ===
+
+* Updated documentation.
+
 === 0.5.2 ===
 
 * Fixed command-line parsing.

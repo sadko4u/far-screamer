@@ -22,7 +22,7 @@
 ARTIFACT_ID                 = FAR_SCREAMER
 ARTIFACT_NAME               = far-screamer
 ARTIFACT_DESC               = Far-Screamer - a command-line tool for performing convolution of audio files
-ARTIFACT_VERSION            = 0.5.2
+ARTIFACT_VERSION            = 0.5.3
 
 #------------------------------------------------------------------------------
 # Plugin dependencies

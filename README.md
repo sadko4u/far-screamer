@@ -41,8 +41,7 @@ The full list can be obtained by issuing ```far-screamer --help``` command and i
 
 ```
 
-Equalizing the wet signal
-===
+### Equalizing the wet signal
 
 The options ```-hp``` and ```-lp``` allow to set-up low-pass and high-pass filter parameters which
 will be applied to the wet (processed) signal. The argument format may be obtained by specifying ```--help```
@@ -88,8 +87,7 @@ Here's the example of setting low-pass filter:
 far-screamer -lp BWC_BT:2:4000:1.41
 ```
 
-Trimming the IR file
-===
+### Trimming the IR file
 
 Before the IR file will be applied to the output, the tool allows to cut some part of it's head and tail
 and add linear fades to the head and the tail of the IR file after trimming. All values are pased in milliseconds
@@ -99,8 +97,7 @@ to the ```-hc```, ```-tc``` parameters for cutting head and tail respectively, a
 These parameters work in the same manner to the [Impulse Reverb](https://lsp-plug.in/?page=manuals&section=impulse_reverb_stereo) plugin series
 of the [LSP Plugins](https://lsp-plug.in/) bundle.
 
-Adding pre-delay
-===
+### Adding pre-delay
 
 By adding the additional delay to the wet (processed) signal we can enhance the spatial location of the recorded
 audio source by moving it to the first plan. The parameter ```-pd``` allows to add the desired amount of milliseconds
@@ -116,8 +113,7 @@ For that purpose parameters ```-dg``` and ```-wg``` are provided which are count
 By default, dry gain is set to -Inf dB and wet gain is set to 0 dB. Values less than -200 are considered to
 be -Inf dB.
 
-Adjusting Mid/Side balance for the stereo output signal
-===
+### Adjusting Mid/Side balance for the stereo output signal
 
 Any stereo signal can be split into middle component and side component. The middle component contains information
 about how the left and right channels are same one to another. The side component, as an opposite, contains information
@@ -127,8 +123,7 @@ the narrower-sounding track.
 
 Parameters ```-mb``` and ```-sb``` allow to set the amplification gain (in dB) of the middle and side components respectively. Values less than -200 dB are considered to be -Inf dB.
 
-Performing audio processing chain mapping
-===
+### Performing audio processing chain mapping
 
 There may be some non-trivial cases of applying convolution to the output file. For example, a purpose of
 convolving 3-channel or 5-channel input file with a stereo impulse response may be possible.
@@ -160,6 +155,15 @@ left and right channels:
 far-screamer -m 1:0:0 -m 0:1:1
 
 ```
+
+### Normalizing the output
+
+Additionally, the output file can be normalized with options ```-n``` and ```-ng```. While ```-ng``` option sets the maximum peak level (in dB) of the output sample, 
+the ```-n``` option allows to specify the normalization algorithm:
+  * **none** - do not use normalization (default);
+  * **above** - normalize the file if the maximum signal peak is above the specified peak level;
+  * **below** - normalize the file if the maximum signal peak is below the specified peak level;
+  * **always** - always normalize output files to match the maximum signal peak to specified peak level.
 
 Requirements
 ======
